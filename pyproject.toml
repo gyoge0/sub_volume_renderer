@@ -1,0 +1,40 @@
+[project]
+authors = [{name = "Yogesh Thambidurai", email = "yogesh@gyoge.com"}]
+name = "rbvr"
+requires-python = ">= 3.11"
+version = "0.1.0"
+dependencies = [ "funlib-geometry>=0.3.0,<0.4", "glfw>=2.9.0,<3"]
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[tool.pixi.pypi-dependencies]
+rbvr = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+main = "python scripts/main.py"
+
+[tool.pixi.dependencies]
+numpy = ">=2.3.0,<3"
+zarr = ">=3.0.8,<4"
+pygfx = ">=0.12.0,<0.13"
+
+[tool.pixi.feature.dev.dependencies]
+pixi-pycharm = ">=0.0.8,<0.0.9"
+pytest = ">=8.4.1,<9.0"
+ruff = ">=0.11.10, <0.12"
+
+[tool.pixi.feature.dev.tasks]
+# F401: unused imports, I: isort
+# both of these should count as formatting for us
+format = "ruff check --select F401,I --fix . && ruff format ."
+check = "ruff check ."
+test = "pytest ."
+
+[tool.pixi.environments]
+dev = ["dev"]

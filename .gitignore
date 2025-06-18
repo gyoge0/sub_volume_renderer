@@ -1,0 +1,7 @@
+.idea
+.hypothesis
+__pycache__
+
+# pixi environments
+.pixi
+*.egg-info
