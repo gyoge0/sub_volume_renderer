@@ -13,6 +13,7 @@ class GlobalSparseVolume(gfx.Volume):
     uniform_type = dict(
         WorldObject.uniform_type,
         chunk_dimensions="3xf4",
+        ring_buffer_dimensions_in_chunks="3xf4",
         volume_dimensions="3xf4",
     )
     material: GlobalSparseVolumeMaterial
@@ -21,39 +22,30 @@ class GlobalSparseVolume(gfx.Volume):
         self,
         data: npt.NDArray[np.float32],
         chunk_dimensions: tuple[int, int, int],
-        cache_size: int | None = None,
+        ring_buffer_n: tuple[int, int, int] = (2, 2, 2),
     ):
         assert len(data.shape) == 3, "Data must be a 3D ndarray"
 
         self.volume_dimensions = data.shape
         self.chunk_dimensions = chunk_dimensions
-
         self.volume_dimensions_in_chunks = tuple(
             d // c for d, c in zip(self.volume_dimensions, self.chunk_dimensions)
         )
-        # noinspection PyTypeChecker
-        self.indirection_texture = gfx.Texture(
-            data=np.zeros(self.volume_dimensions_in_chunks, dtype=np.float32), dim=3
-        )
 
-        if cache_size is not None:
-            assert cache_size > 0, "Cache size must be a positive integer"
-            self.cache_size = cache_size
-        else:
-            # Store everything in the cache for now
-            self.cache_size = (
-                self.chunk_dimensions[0]
-                * self.chunk_dimensions[1]
-                * self.chunk_dimensions[2]
-            )
-        cache_shape = (
-            self.cache_size * self.chunk_dimensions[0],
-            self.chunk_dimensions[1],
-            self.chunk_dimensions[2],
+        self.ring_buffer_dimensions_in_chunks = (
+            2 * ring_buffer_n[0] + 1,
+            2 * ring_buffer_n[1] + 1,
+            2 * ring_buffer_n[2] + 1,
+        )
+        self._ring_buffer_shape = (
+            self.ring_buffer_dimensions_in_chunks[0] * self.chunk_dimensions[0],
+            self.ring_buffer_dimensions_in_chunks[1] * self.chunk_dimensions[1],
+            self.ring_buffer_dimensions_in_chunks[2] * self.chunk_dimensions[2],
         )
         # noinspection PyTypeChecker
-        self.cache_texture = gfx.Texture(
-            data=np.ones(cache_shape, dtype=np.float32), dim=3
+        self.ring_buffer_texture = gfx.Texture(
+            data=np.ones(self._ring_buffer_shape, dtype=np.float32),
+            dim=3,
         )
 
         # we make a dummy geometry here since we override self._get_bounds_from_geometry later, which is what matters
@@ -70,6 +62,9 @@ class GlobalSparseVolume(gfx.Volume):
         )
         self.uniform_buffer.data["chunk_dimensions"] = np.array(
             self.chunk_dimensions, dtype=np.float32
+        )
+        self.uniform_buffer.data["ring_buffer_dimensions_in_chunks"] = np.array(
+            self.ring_buffer_dimensions_in_chunks, dtype=np.float32
         )
 
     def _get_bounds_from_geometry(self):

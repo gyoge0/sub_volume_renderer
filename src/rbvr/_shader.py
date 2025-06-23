@@ -39,7 +39,7 @@ class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
         self["mode"] = "mip"
         # Set image format
         self["climcorrection"] = ""
-        fmt = to_texture_format(wobject.cache_texture.format)
+        fmt = to_texture_format(wobject.ring_buffer_texture.format)
         if "norm" in fmt or "float" in fmt:
             self["img_format"] = "f32"
             if "unorm" in fmt:
@@ -58,7 +58,7 @@ class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
         self["img_nchannels"] = len(fmt) - len(fmt.lstrip("rgba"))
 
         # Colorspace
-        self["colorspace"] = wobject.cache_texture.colorspace
+        self["colorspace"] = wobject.ring_buffer_texture.colorspace
         if material.map is not None:
             self["colorspace"] = material.map.texture.colorspace
 
@@ -71,29 +71,24 @@ class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
             wgpu.Binding("u_material", "buffer/uniform", material.uniform_buffer),
         ]
 
-        # our indirection texture
-        # we don't provide a sampler for the indirection texture since the shader
-        # is expected to only read valid texels from it
-        t_indirection = wgpu.GfxTextureView(wobject.indirection_texture)
-        bindings.append(
-            wgpu.Binding(
-                "t_indirection", "texture/auto", t_indirection, vertex_and_fragment
-            )
-        )
-
-        # our cache texture
-        # we provide a sampler for the cache texture to allow filtering
-        t_cache = wgpu.GfxTextureView(wobject.cache_texture)
-        s_cache = wgpu.GfxSampler(
+        # our ring buffer. iffy on how the sampler should work, but in theory the only place where interpolation matters
+        # would be in the boundary where the ring buffer in a single dimension ends. still, we only use textureLoad and
+        # don't use the sampler in the shader yet.
+        t_ring_buffer = wgpu.GfxTextureView(wobject.ring_buffer_texture)
+        s_ring_buffer = wgpu.GfxSampler(
             # material.interpolation,
             "nearest",
             "clamp",
         )
         bindings.append(
-            wgpu.Binding("s_cache", "sampler/filtering", s_cache, "FRAGMENT")
+            wgpu.Binding(
+                "s_ring_buffer", "sampler/filtering", s_ring_buffer, "FRAGMENT"
+            )
         )
         bindings.append(
-            wgpu.Binding("t_cache", "texture/auto", t_cache, vertex_and_fragment)
+            wgpu.Binding(
+                "t_ring_buffer", "texture/auto", t_ring_buffer, vertex_and_fragment
+            )
         )
 
         if material.map is not None:

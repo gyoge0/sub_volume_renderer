@@ -14,15 +14,21 @@ def increasing_data(chunk_dimensions):
 
 
 def test_volume_math(increasing_data, chunk_dimensions):
-    volume = GlobalSparseVolume(increasing_data, chunk_dimensions)
+    volume = GlobalSparseVolume(
+        increasing_data, chunk_dimensions, ring_buffer_n=(1, 1, 1)
+    )
 
     assert volume.volume_dimensions_in_chunks == (5, 5, 5)
-    assert volume.cache_size == 125  # 5 * 5 * 5
-    assert volume.cache_texture.data.shape == (125 * 5, 5, 5)  # 125 chunks of 5x5x5
+    # 1 * 2 + 1
+    assert volume.ring_buffer_dimensions_in_chunks == (3, 3, 3)
+    # 3x3x3 chunks of 5x5x5 each
+    assert volume.ring_buffer_texture.data.shape == (15, 15, 15)
 
 
 def test_basic_scene_init(increasing_data, chunk_dimensions, gfx_context, caplog):
-    volume = GlobalSparseVolume(increasing_data, chunk_dimensions)
+    volume = GlobalSparseVolume(
+        increasing_data, chunk_dimensions, ring_buffer_n=(2, 2, 2)
+    )
     with caplog.at_level("ERROR", logger="wgpu"):
         _ = gfx_context.render_object(volume)
     assert caplog.text == ""
