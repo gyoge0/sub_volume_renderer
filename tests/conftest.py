@@ -27,6 +27,9 @@ class GfxContext:
         self._canvas.request_draw(
             lambda: self._renderer.render(self._scene, self._camera)
         )
+        return self.draw()
+
+    def draw(self) -> npt.NDArray[np.float32]:
         raw_result = self._canvas.draw()
         return np.asarray(raw_result)
 
