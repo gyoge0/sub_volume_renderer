@@ -1,16 +1,5 @@
 import numpy as np
-import pytest
 from rbvr import GlobalSparseVolume
-
-
-@pytest.fixture
-def chunk_dimensions():
-    return 5, 5, 5
-
-
-@pytest.fixture
-def increasing_data(chunk_dimensions):
-    return np.arange(25**3).reshape((25, 25, 25)).astype(np.float32)
 
 
 def test_volume_math(increasing_data, chunk_dimensions):

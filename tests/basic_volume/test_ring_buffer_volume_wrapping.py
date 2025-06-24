@@ -1,20 +1,13 @@
 import numpy as np
-import pytest
 from rbvr import GlobalSparseVolume
 
 
-@pytest.fixture
-def chunk_dimensions():
-    return 5, 5, 5
-
-
-@pytest.fixture
-def data(chunk_dimensions):
-    return np.arange(25**3).reshape((25, 25, 25)).astype(np.float32)
-
-
-def test_ring_buffer_volume_wrapping(data, chunk_dimensions, gfx_context, camera):
-    volume = GlobalSparseVolume(data, chunk_dimensions, ring_buffer_n=(1, 1, 1))
+def test_ring_buffer_volume_wrapping(
+    data_shape, increasing_data, chunk_dimensions, gfx_context, camera
+):
+    volume = GlobalSparseVolume(
+        increasing_data, chunk_dimensions, ring_buffer_n=(1, 1, 1)
+    )
     volume.world.position = 0, 0, 0
     camera.show_object(volume, match_aspect=True)
 
