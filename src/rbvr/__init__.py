@@ -1,4 +1,5 @@
 from ._geometry import Coordinate, Roi
+from ._manager import RingBufferManager, WorldCoordinateRingBufferManager
 from ._types import Float32Array
 from ._wobject import GlobalSparseVolume
 
@@ -11,4 +12,6 @@ __all__ = [
     "Float32Array",
     "Roi",
     "Coordinate",
+    "RingBufferManager",
+    "WorldCoordinateRingBufferManager",
 ]
