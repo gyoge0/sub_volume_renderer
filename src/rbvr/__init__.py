@@ -1,3 +1,4 @@
+from ._geometry import Coordinate, Roi
 from ._types import Float32Array
 from ._wobject import GlobalSparseVolume
 
@@ -8,4 +9,6 @@ from ._shader import GlobalSparseVolumeShader  # noqa: F401 # isort: skip
 __all__ = [
     "GlobalSparseVolume",
     "Float32Array",
+    "Roi",
+    "Coordinate",
 ]
