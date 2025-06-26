@@ -78,7 +78,7 @@ class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
         s_ring_buffer = wgpu.GfxSampler(
             # material.interpolation,
             "nearest",
-            "clamp",
+            "repeat",
         )
         bindings.append(
             wgpu.Binding(
