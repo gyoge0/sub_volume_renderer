@@ -52,15 +52,17 @@ class GlobalSparseVolume(gfx.Volume):
             material=GlobalSparseVolumeMaterial(),
         )
 
-        # we need to call super before we can set the uniform buffer
+        # indexing in the shader is done Fortran style (z, y, x), but these dimensions
+        # all assume numpy/C style indexing (x, y, z). we pass the dimensions in Fortran
+        # style to the shader so the shader completely operates in Fortran style.
         self.uniform_buffer.data["volume_dimensions"] = np.array(
-            self.volume_dimensions, dtype=np.float32
+            self.volume_dimensions[::-1], dtype=np.float32
         )
         self.uniform_buffer.data["chunk_dimensions"] = np.array(
-            self.chunk_dimensions, dtype=np.float32
+            self.chunk_dimensions[::-1], dtype=np.float32
         )
         self.uniform_buffer.data["ring_buffer_dimensions_in_chunks"] = np.array(
-            self.ring_buffer_dimensions_in_chunks, dtype=np.float32
+            self.ring_buffer_dimensions_in_chunks[::-1], dtype=np.float32
         )
 
     def _get_bounds_from_geometry(self):
