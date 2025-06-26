@@ -1,3 +1,5 @@
+from warnings import deprecated
+
 import numpy as np
 
 from ._geometry import Coordinate, Roi
@@ -11,6 +13,7 @@ type CoordinateAssignment = tuple[Coordinate, Coordinate]
 type RoiAssignment = tuple[Roi, Roi]
 
 
+@deprecated("Will be removed for a version based on the new ring buffer API.")
 class RingBufferManager:
     # PyCharm tries to resolve references in the docstring examples
     # noinspection PyUnresolvedReferences
@@ -135,6 +138,7 @@ class RingBufferManager:
         return difference
 
 
+@deprecated("Will be removed for a version based on the new ring buffer API.")
 class WorldCoordinateRingBufferManager(RingBufferManager):
     """
     A special ring buffer that:
