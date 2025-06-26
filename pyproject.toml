@@ -24,17 +24,21 @@ numpy = ">=2.3.0,<3"
 zarr = ">=3.0.8,<4"
 pygfx = ">=0.12.0,<0.13"
 
+[tool.pixi.feature.test.dependencies]
+pytest = ">=8.4.1,<9.0"
+
 [tool.pixi.feature.dev.dependencies]
 pixi-pycharm = ">=0.0.8,<0.0.9"
-pytest = ">=8.4.1,<9.0"
 ruff = ">=0.11.10, <0.12"
+
+[tool.pixi.feature.test.tasks]
+test = "pytest ."
 
 [tool.pixi.feature.dev.tasks]
 # F401: unused imports, I: isort
 # both of these should count as formatting for us
 format = "ruff check --select F401,I --fix . && ruff format ."
 check = "ruff check ."
-test = "pytest ."
 
 [tool.pixi.environments]
-dev = ["dev"]
+dev = ["dev", "test"]

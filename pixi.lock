@@ -851,7 +851,7 @@ packages:
 - pypi: ./
   name: rbvr
   version: 0.1.0
-  sha256: e74b15b4356aec69ccfdf8da80b14f98b8ce4e7b880652171d1d94d3ab23d1b3
+  sha256: 093f7d08451b242bc5faa62645f390bc553e4abd79262a7e008bb9953044ada3
   requires_dist:
   - funlib-geometry>=0.3.0,<0.4
   - glfw>=2.9.0,<3
