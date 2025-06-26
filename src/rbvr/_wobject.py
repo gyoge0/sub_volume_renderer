@@ -17,6 +17,7 @@ class GlobalSparseVolume(gfx.Volume):
         chunk_dimensions="3xf4",
         ring_buffer_dimensions_in_chunks="3xf4",
         volume_dimensions="3xf4",
+        ring_buffer_n="3xf4",
     )
     material: GlobalSparseVolumeMaterial
 
@@ -34,6 +35,7 @@ class GlobalSparseVolume(gfx.Volume):
             d // c for d, c in zip(self.volume_dimensions, self.chunk_dimensions)
         )
 
+        self.ring_buffer_n = ring_buffer_n
         self.ring_buffer_dimensions_in_chunks = ring_buffer_n * 2 + 1
         self._ring_buffer_shape = (
             self.ring_buffer_dimensions_in_chunks * self.chunk_dimensions
@@ -63,6 +65,9 @@ class GlobalSparseVolume(gfx.Volume):
         )
         self.uniform_buffer.data["ring_buffer_dimensions_in_chunks"] = np.array(
             self.ring_buffer_dimensions_in_chunks[::-1], dtype=np.float32
+        )
+        self.uniform_buffer.data["ring_buffer_n"] = np.array(
+            self.ring_buffer_n[::-1], dtype=np.float32
         )
 
     def _get_bounds_from_geometry(self):
