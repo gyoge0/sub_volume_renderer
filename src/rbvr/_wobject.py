@@ -4,6 +4,8 @@ import pygfx as gfx
 from pygfx import WorldObject
 from pygfx.utils.bounds import Bounds
 
+from ._geometry import Coordinate
+
 
 class GlobalSparseVolumeMaterial(gfx.VolumeMipMaterial):
     pass
@@ -21,26 +23,20 @@ class GlobalSparseVolume(gfx.Volume):
     def __init__(
         self,
         data: npt.NDArray[np.float32],
-        chunk_dimensions: tuple[int, int, int],
-        ring_buffer_n: tuple[int, int, int] = (2, 2, 2),
+        chunk_dimensions: Coordinate,
+        ring_buffer_n: Coordinate = Coordinate(2, 2, 2),
     ):
         assert len(data.shape) == 3, "Data must be a 3D ndarray"
 
         self.volume_dimensions = data.shape
         self.chunk_dimensions = chunk_dimensions
-        self.volume_dimensions_in_chunks = tuple(
+        self.volume_dimensions_in_chunks = Coordinate(
             d // c for d, c in zip(self.volume_dimensions, self.chunk_dimensions)
         )
 
-        self.ring_buffer_dimensions_in_chunks = (
-            2 * ring_buffer_n[0] + 1,
-            2 * ring_buffer_n[1] + 1,
-            2 * ring_buffer_n[2] + 1,
-        )
+        self.ring_buffer_dimensions_in_chunks = ring_buffer_n * 2 + 1
         self._ring_buffer_shape = (
-            self.ring_buffer_dimensions_in_chunks[0] * self.chunk_dimensions[0],
-            self.ring_buffer_dimensions_in_chunks[1] * self.chunk_dimensions[1],
-            self.ring_buffer_dimensions_in_chunks[2] * self.chunk_dimensions[2],
+            self.ring_buffer_dimensions_in_chunks * self.chunk_dimensions
         )
         # noinspection PyTypeChecker
         self.ring_buffer_texture = gfx.Texture(

@@ -1,12 +1,12 @@
 import numpy as np
-from rbvr import GlobalSparseVolume
+from rbvr import Coordinate, GlobalSparseVolume
 
 
 def test_volume_texture_update(
     data_shape, increasing_data, chunk_dimensions, gfx_context, camera
 ):
     volume = GlobalSparseVolume(
-        increasing_data, chunk_dimensions, ring_buffer_n=(1, 1, 1)
+        increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
     )
     volume.world.position = 0, 0, 0
     camera.show_object(volume, match_aspect=True)

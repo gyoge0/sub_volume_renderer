@@ -1,7 +1,7 @@
 import numpy as np
 import pygfx as gfx
 import wgpu
-from rbvr import GlobalSparseVolume
+from rbvr import Coordinate, GlobalSparseVolume
 from rendercanvas.auto import RenderCanvas, loop
 
 # select gpu
@@ -24,11 +24,11 @@ background = gfx.Background(None, gfx.BackgroundMaterial(light_gray, dark_gray))
 scene.add(background)
 scene.add(gfx.AmbientLight())
 
-chunk_dimensions = (5, 5, 5)
+chunk_dimensions = Coordinate(5, 5, 5)
 volume = GlobalSparseVolume(
     np.zeros((25, 25, 25), dtype=np.float32),
     chunk_dimensions,
-    (1, 1, 1),
+    Coordinate(1, 1, 1),
 )
 
 initial_data = np.zeros((15, 15, 15))

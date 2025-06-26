@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
+from rbvr import Coordinate
 
 
 @pytest.fixture
 def chunk_dimensions():
-    return 5, 5, 5
+    return Coordinate(5, 5, 5)
 
 
 @pytest.fixture
