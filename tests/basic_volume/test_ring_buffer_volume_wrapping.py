@@ -1,12 +1,41 @@
 import numpy as np
+import pytest
 from rbvr import Coordinate, GlobalSparseVolume
 
 
+@pytest.fixture
+def zero_data(data_shape):
+    return np.zeros(data_shape, dtype=np.float32)
+
+
+@pytest.fixture
+def ring_buffer_n():
+    return Coordinate(1, 1, 1)
+
+
+# noinspection PyShadowingNames
+@pytest.fixture
+def spotty_data(ring_buffer_n, chunk_dimensions):
+    buffer_shape = ring_buffer_n * 2 + 1
+    buffer_shape *= chunk_dimensions
+
+    data = np.zeros(buffer_shape)
+    data[:, 5:10, 5:10] = 1.0
+    data = data.astype(np.float32)
+    return data
+
+
+# noinspection PyShadowingNames
 def test_ring_buffer_volume_wrapping(
-    data_shape, increasing_data, chunk_dimensions, gfx_context, camera
+    data_shape,
+    zero_data,
+    spotty_data,
+    chunk_dimensions,
+    gfx_context,
+    camera,
 ):
     volume = GlobalSparseVolume(
-        increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
+        zero_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
     )
     volume.world.position = 0, 0, 0
     camera.show_object(volume, match_aspect=True)
@@ -15,8 +44,7 @@ def test_ring_buffer_volume_wrapping(
     # This region should be seen when wrapping!
     # Note that we probably shouldn't set to the ring buffer texture directly,
     # but this will test the wrapping in the shader.
-    volume.ring_buffer_texture.data[:, :, :] = 0.0
-    volume.ring_buffer_texture.data[:, 5:10, 5:10] = 1.0
+    volume.ring_buffer_texture.data[:, :, :] = spotty_data
     volume.ring_buffer_texture.update_full()
 
     expected = np.zeros((480, 480, 4))
