@@ -1,6 +1,7 @@
 import numpy as np
 import pygfx as gfx
 import wgpu
+import zarr
 from rbvr import Coordinate, GlobalSparseVolume, Roi, WorldCoordinateRingBufferManager
 from rendercanvas.auto import RenderCanvas, loop
 
@@ -11,8 +12,14 @@ selected_adapters = [a for a in adapters if description.lower() in a.summary.low
 if selected_adapters:
     gfx.renderers.wgpu.select_adapter(selected_adapters[0])
 
-scaled_data = np.linspace(1 / 128, 1, 128)[:, None, None] * np.ones((128, 4, 8))
-scaled_data[0, :, :] = 1.0
+# noinspection SpellCheckingInspection
+data = zarr.open_array(
+    "/nrs/funke/data/lightsheet/130312_platynereis/13-03-12.zarr/raw"
+)
+# data is stored as [channel, t, z, y, x]
+scaled_data = data[0, 378, :, :, :]
+scaled_data = scaled_data / scaled_data.max()
+scaled_data[:25, :25, :25] = 1.0
 scaled_data = scaled_data.astype(np.float32)
 
 canvas = RenderCanvas(size=(480, 480))
@@ -28,8 +35,8 @@ background = gfx.Background(None, gfx.BackgroundMaterial(light_gray, dark_gray))
 scene.add(background)
 scene.add(gfx.AmbientLight())
 
-chunk_dimensions = Coordinate(2, 2, 2)
-view_distance = Coordinate(2, 2, 2)
+chunk_dimensions = Coordinate(256, 64, 64)
+view_distance = Coordinate(3, 3, 3)
 volume = GlobalSparseVolume(
     scaled_data,
     chunk_dimensions,
@@ -59,10 +66,10 @@ def update_ops(ops):
             offset=dst.offset,
             shape=scaled_data[src.to_slices()].shape,
         )
+        volume.ring_buffer_texture.data[dst.to_slices()] = 0.0
         volume.ring_buffer_texture.data[copy_roi.to_slices()] = scaled_data[
             src.to_slices()
         ]
-
         volume.ring_buffer_texture.update_range(copy_roi.offset, copy_roi.shape)
 
 
@@ -73,7 +80,7 @@ update_ops(manager.initial_assignments)
 def do_draw():
     renderer.render(scene, camera)
     # our camera pos is in world coordinates
-    # we converse it into volume data coordinates
+    # we convert it into volume data coordinates
     camera_data_pos = tuple(
         volume.world.inverse_matrix @ camera.world.matrix @ np.array([0, 0, 0, 1])
     )[:3]
@@ -87,8 +94,6 @@ def do_draw():
     update_ops(ops)
 
 
-camera.world.position = -19.81, 7.5, 7.5
-# noinspection PyTypeChecker
-camera.look_at((-1, 0, 0))
+camera.show_object(volume, view_dir=(-1, 0, 0))
 
 loop.run()
