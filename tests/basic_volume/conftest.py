@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from rbvr import Coordinate
+
+from sub_volume import Coordinate
 
 
 @pytest.fixture

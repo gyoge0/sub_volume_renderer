@@ -1,4 +1,4 @@
-{$ include 'rbvr.sample_vol.wgsl' $}
+{$ include 'sub_volume.sample_vol.wgsl' $}
 
 @fragment
 fn fs_main(varyings: Varyings) -> FragmentOutput {

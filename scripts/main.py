@@ -1,8 +1,9 @@
 import numpy as np
 import pygfx as gfx
 import wgpu
-from rbvr import Coordinate, GlobalSparseVolume, Roi, WorldCoordinateRingBufferManager
 from rendercanvas.auto import RenderCanvas, loop
+
+from sub_volume import Coordinate, Roi, SubVolume, WorldCoordinateRingBufferManager
 
 # select gpu
 adapters = wgpu.gpu.enumerate_adapters_sync()
@@ -30,7 +31,7 @@ scene.add(gfx.AmbientLight())
 
 chunk_dimensions = Coordinate(2, 2, 2)
 view_distance = Coordinate(2, 2, 2)
-volume = GlobalSparseVolume(
+volume = SubVolume(
     scaled_data,
     chunk_dimensions,
     view_distance,

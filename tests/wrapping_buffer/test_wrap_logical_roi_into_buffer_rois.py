@@ -83,7 +83,7 @@ def test_wrap_three_dims(buffer):
 
 
 def test_wrap_three_dims_multiple_wraps(buffer):
-    # same as test_wrap_three_dims except we are not in the origin buffer buffer
+    # same as test_wrap_three_dims except we are not in the origin buffer
     roi = Roi((13, 12, 14), (4, 4, 4))
     result = buffer.wrap_logical_roi_into_buffer_rois(roi)
     assert len(result) == 8

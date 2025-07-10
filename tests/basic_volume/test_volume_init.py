@@ -1,9 +1,10 @@
 import numpy as np
-from rbvr import Coordinate, GlobalSparseVolume
+
+from sub_volume import Coordinate, SubVolume
 
 
 def test_volume_math(increasing_data, chunk_dimensions):
-    volume = GlobalSparseVolume(
+    volume = SubVolume(
         increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
     )
 
@@ -15,7 +16,7 @@ def test_volume_math(increasing_data, chunk_dimensions):
 
 
 def test_basic_scene_init(increasing_data, chunk_dimensions, gfx_context, caplog):
-    volume = GlobalSparseVolume(
+    volume = SubVolume(
         increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(5, 5, 5)
     )
     with caplog.at_level("ERROR", logger="wgpu"):
@@ -24,7 +25,7 @@ def test_basic_scene_init(increasing_data, chunk_dimensions, gfx_context, caplog
 
 
 def test_volume_positioning(increasing_data, chunk_dimensions, gfx_context, camera):
-    volume = GlobalSparseVolume(increasing_data, chunk_dimensions)
+    volume = SubVolume(increasing_data, chunk_dimensions)
     volume.world.position = 0, 0, 0
     camera.show_object(volume, match_aspect=True)
 

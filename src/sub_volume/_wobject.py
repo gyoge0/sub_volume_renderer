@@ -7,11 +7,11 @@ from pygfx.utils.bounds import Bounds
 from ._geometry import Coordinate
 
 
-class GlobalSparseVolumeMaterial(gfx.VolumeMipMaterial):
+class SubVolumeMaterial(gfx.VolumeMipMaterial):
     pass
 
 
-class GlobalSparseVolume(gfx.Volume):
+class SubVolume(gfx.Volume):
     uniform_type = dict(
         WorldObject.uniform_type,
         chunk_dimensions="3xf4",
@@ -19,7 +19,7 @@ class GlobalSparseVolume(gfx.Volume):
         volume_dimensions="3xf4",
         ring_buffer_n="3xf4",
     )
-    material: GlobalSparseVolumeMaterial
+    material: SubVolumeMaterial
 
     def __init__(
         self,
@@ -51,7 +51,7 @@ class GlobalSparseVolume(gfx.Volume):
         geometry = gfx.box_geometry(*self.volume_dimensions)
         super().__init__(
             geometry=geometry,
-            material=GlobalSparseVolumeMaterial(),
+            material=SubVolumeMaterial(),
         )
 
         # indexing in the shader is done Fortran style (z, y, x), but these dimensions

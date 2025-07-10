@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 # noinspection PyProtectedMember
-from rbvr._wrapping_buffer import subtract_rois
+from sub_volume._wrapping_buffer import subtract_rois
 
 
 def test_no_overlap():

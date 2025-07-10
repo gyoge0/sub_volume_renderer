@@ -14,23 +14,23 @@ from pygfx.renderers.wgpu import (
 # hard coding the flag.
 from pygfx.renderers.wgpu.shaders.volumeshader import vertex_and_fragment
 
-from ._wobject import GlobalSparseVolume, GlobalSparseVolumeMaterial
+from ._wobject import SubVolume, SubVolumeMaterial
 
-register_wgsl_loader("rbvr", PackageLoader("rbvr", "shaders"))
+register_wgsl_loader("sub_volume", PackageLoader("sub_volume", "shaders"))
 
 
-@wgpu.register_wgpu_render_function(GlobalSparseVolume, GlobalSparseVolumeMaterial)
-class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
-    def __init__(self, wobject: GlobalSparseVolume, **kwargs):
+@wgpu.register_wgpu_render_function(SubVolume, SubVolumeMaterial)
+class SubVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
+    def __init__(self, wobject: SubVolume, **kwargs):
         # skip the BaseVolumeShader init because we don't have a geometry.grid and
         # that breaks the init.
         # we perform all the actions from BaseVolumeShader inside this init.
         BaseShader.__init__(self, wobject, **kwargs)
 
-        material: GlobalSparseVolumeMaterial = wobject.material
+        material: SubVolumeMaterial = wobject.material
 
         # BaseVolumeShader makes a bunch of assertions here about the geometry,
-        # but since we require wobject to be a CustomVolume,
+        # but since we require wobject to be a SubVolume,
         # the wobject will have already made those assertions for us.
 
         # Set the render mode
@@ -103,5 +103,5 @@ class GlobalSparseVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
 
     def get_code(self):
         return load_wgsl(
-            "ring_buffer_volume_renderer.wgsl", package_name="rbvr.shaders"
+            "ring_buffer_volume_renderer.wgsl", package_name="sub_volume.shaders"
         )

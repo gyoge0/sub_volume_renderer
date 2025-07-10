@@ -2,7 +2,8 @@ from itertools import product
 
 from hypothesis import given
 from hypothesis import strategies as st
-from rbvr import Coordinate, RingBufferManager
+
+from sub_volume import Coordinate, RingBufferManager
 
 
 def create_expected_from_origin(

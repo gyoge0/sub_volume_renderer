@@ -1,11 +1,12 @@
 import numpy as np
-from rbvr import Coordinate, GlobalSparseVolume
+
+from sub_volume import Coordinate, SubVolume
 
 
 def test_volume_texture_update(
     data_shape, increasing_data, chunk_dimensions, gfx_context, camera
 ):
-    volume = GlobalSparseVolume(
+    volume = SubVolume(
         increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
     )
     volume.world.position = 0, 0, 0

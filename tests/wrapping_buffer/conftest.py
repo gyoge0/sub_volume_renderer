@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 from funlib.geometry import Coordinate
-from rbvr._wrapping_buffer import WrappingBuffer
+
+from sub_volume._wrapping_buffer import WrappingBuffer
 
 
 @pytest.fixture

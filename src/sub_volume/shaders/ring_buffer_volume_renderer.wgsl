@@ -12,8 +12,8 @@ $$ endif
 $$ if mode == 'iso'
     {$ include 'pygfx.light_phong_simple.wgsl' $}
 $$ endif
-{$ include 'rbvr.volume_common.wgsl' $}
+{$ include 'sub_volume.volume_common.wgsl' $}
 
-{$ include 'rbvr.vs_main.wgsl' $}
-{$ include 'rbvr.raycast.wgsl' $}
-{$ include 'rbvr.fs_main.wgsl' $}
+{$ include 'sub_volume.vs_main.wgsl' $}
+{$ include 'sub_volume.raycast.wgsl' $}
+{$ include 'sub_volume.fs_main.wgsl' $}
