@@ -10,6 +10,11 @@ class WrappingBuffer:
     Handles chunking, wrapping, and efficient data movement into a gfx.Texture.
     """
 
+    uniform_type = dict(
+        current_logical_offset_in_pixels="3xi4",
+        current_logical_shape_in_pixels="3xi4",
+    )
+
     def __init__(
         self,
         backing_data: npt.NDArray,
@@ -36,8 +41,41 @@ class WrappingBuffer:
             dim=3,
         )
 
-        self._current_logical_roi_in_pixels: Roi | None = None
+        # create our uniform buffer
+        # we need to create this BEFORE we set _current_logical_roi_in_pixels
+        self.uniform_buffer = gfx.Buffer(
+            gfx.utils.array_from_shadertype(self.uniform_type), force_contiguous=True
+        )
+        # this will fill our uniform buffer with data
+        self._current_logical_roi_in_pixels = None
         self._current_logical_roi_in_chunks: Roi | None = None
+
+    @property
+    def _current_logical_roi_in_pixels(self) -> Roi | None:
+        # this could raise an AttributeError if not created yet
+        return self.__current_logical_roi_in_pixels
+
+    @_current_logical_roi_in_pixels.setter
+    def _current_logical_roi_in_pixels(self, value: Roi | None):
+        self.__current_logical_roi_in_pixels = value
+        # indexing in the shader is done Fortran style (z, y, x), but these dimensions
+        # all assume numpy/C style indexing (x, y, z). we pass the dimensions in Fortran
+        # style to the shader so the shader completely operates in Fortran style.
+        if value is not None:
+            self.uniform_buffer.data["current_logical_offset_in_pixels"] = np.array(
+                value.offset
+            ).astype(int)[::-1]
+            self.uniform_buffer.data["current_logical_shape_in_pixels"] = np.array(
+                value.shape
+            ).astype(int)[::-1]
+        else:
+            self.uniform_buffer.data["current_logical_offset_in_pixels"] = np.array(
+                (0, 0, 0)
+            ).astype(int)[::-1]
+            self.uniform_buffer.data["current_logical_shape_in_pixels"] = np.array(
+                (0, 0, 0)
+            ).astype(int)[::-1]
+        self.uniform_buffer.update_full()
 
     def get_snapped_roi_in_pixels(self, logical_roi_in_pixels: Roi) -> Roi:
         # Snap to chunk bounds (grow)
