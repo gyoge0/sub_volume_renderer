@@ -1,9 +1,10 @@
 import numpy as np
 import pygfx as gfx
 import wgpu
+from funlib.geometry import Coordinate, Roi
 from rendercanvas.auto import RenderCanvas, loop
 
-from sub_volume import Coordinate, Roi, SubVolume, WorldCoordinateRingBufferManager
+from sub_volume import SubVolume, WorldCoordinateRingBufferManager
 
 # select gpu
 adapters = wgpu.gpu.enumerate_adapters_sync()

@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-
-from sub_volume import Coordinate
+from funlib.geometry import Coordinate
 
 
 @pytest.fixture

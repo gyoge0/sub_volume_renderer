@@ -1,9 +1,10 @@
 from itertools import product
 
+from funlib.geometry import Coordinate
 from hypothesis import given
 from hypothesis import strategies as st
 
-from sub_volume import Coordinate, RingBufferManager
+from sub_volume import RingBufferManager
 
 
 def create_expected_from_origin(

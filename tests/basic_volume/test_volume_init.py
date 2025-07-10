@@ -1,6 +1,7 @@
 import numpy as np
+from funlib.geometry import Coordinate
 
-from sub_volume import Coordinate, SubVolume
+from sub_volume import SubVolume
 
 
 def test_volume_math(increasing_data, chunk_dimensions):

@@ -1,10 +1,9 @@
 import numpy as np
 import numpy.typing as npt
 import pygfx as gfx
+from funlib.geometry import Coordinate
 from pygfx import WorldObject
 from pygfx.utils.bounds import Bounds
-
-from ._geometry import Coordinate
 
 
 class SubVolumeMaterial(gfx.VolumeMipMaterial):

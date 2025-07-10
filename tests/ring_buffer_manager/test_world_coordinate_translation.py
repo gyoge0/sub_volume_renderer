@@ -1,7 +1,8 @@
+from funlib.geometry import Coordinate, Roi
 from hypothesis import given
 from hypothesis import strategies as st
 
-from sub_volume import Coordinate, Roi, WorldCoordinateRingBufferManager
+from sub_volume import WorldCoordinateRingBufferManager
 
 
 # this test is just the implementation... do we really need it?
