@@ -11,7 +11,7 @@ def test_volume_math(increasing_data, chunk_dimensions):
 
     assert volume.volume_dimensions_in_chunks == (5, 5, 5)
     # 1 * 2 + 1
-    assert volume.ring_buffer_dimensions_in_chunks == (3, 3, 3)
+    assert volume.ring_buffer_shape_in_chunks == (3, 3, 3)
     # 3x3x3 chunks of 5x5x5 each
     assert volume.ring_buffer_texture.data.shape == (15, 15, 15)
 

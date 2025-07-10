@@ -1,9 +1,12 @@
 import numpy as np
 import numpy.typing as npt
 import pygfx as gfx
-from funlib.geometry import Coordinate
+import zarr
+from funlib.geometry import Roi
 from pygfx import WorldObject
 from pygfx.utils.bounds import Bounds
+
+from ._wrapping_buffer import WrappingBuffer
 
 
 class SubVolumeMaterial(gfx.VolumeMipMaterial):
@@ -13,40 +16,32 @@ class SubVolumeMaterial(gfx.VolumeMipMaterial):
 class SubVolume(gfx.Volume):
     uniform_type = dict(
         WorldObject.uniform_type,
-        chunk_dimensions="3xf4",
-        ring_buffer_dimensions_in_chunks="3xf4",
         volume_dimensions="3xf4",
-        ring_buffer_n="3xf4",
     )
     material: SubVolumeMaterial
 
     def __init__(
         self,
-        data: npt.NDArray[np.float32],
-        chunk_dimensions: Coordinate,
-        ring_buffer_n: Coordinate = Coordinate(2, 2, 2),
+        data: npt.NDArray | zarr.Array,
+        buffer_shape_in_chunks: tuple[int, int, int],
+        chunk_shape_in_pixels: tuple[int, int, int] | None = None,
     ):
-        assert len(data.shape) == 3, "Data must be a 3D ndarray"
-
         self.volume_dimensions = data.shape
-        self.chunk_dimensions = chunk_dimensions
-        self.volume_dimensions_in_chunks = Coordinate(
-            d // c for d, c in zip(self.volume_dimensions, self.chunk_dimensions)
+
+        if chunk_shape_in_pixels is None and hasattr(data, "chunks"):
+            chunk_shape_in_pixels = data.chunks
+        elif chunk_shape_in_pixels is None:
+            raise ValueError(
+                "if chunk_shape_in_pixels is not provided, data must have a 'chunks' attribute"
+            )
+        assert len(chunk_shape_in_pixels) == data.ndim
+
+        self.wrapping_buffer = WrappingBuffer(
+            backing_data=data,
+            shape_in_chunks=buffer_shape_in_chunks,
+            chunk_shape_in_pixels=chunk_shape_in_pixels,
         )
 
-        self.ring_buffer_n = ring_buffer_n
-        self.ring_buffer_dimensions_in_chunks = ring_buffer_n * 2 + 1
-        self._ring_buffer_shape = (
-            self.ring_buffer_dimensions_in_chunks * self.chunk_dimensions
-        )
-        # noinspection PyTypeChecker
-        self.ring_buffer_texture = gfx.Texture(
-            data=np.ones(self._ring_buffer_shape, dtype=np.float32),
-            dim=3,
-        )
-
-        # we make a dummy geometry here since we override self._get_bounds_from_geometry later, which is what matters
-        # more. debatable on if we should do a proper geometry or not.
         geometry = gfx.box_geometry(*self.volume_dimensions)
         super().__init__(
             geometry=geometry,
@@ -57,17 +52,45 @@ class SubVolume(gfx.Volume):
         # all assume numpy/C style indexing (x, y, z). we pass the dimensions in Fortran
         # style to the shader so the shader completely operates in Fortran style.
         self.uniform_buffer.data["volume_dimensions"] = np.array(
-            self.volume_dimensions[::-1], dtype=np.float32
+            tuple(self.volume_dimensions)[::-1], dtype=np.float32
         )
-        self.uniform_buffer.data["chunk_dimensions"] = np.array(
-            self.chunk_dimensions[::-1], dtype=np.float32
+
+    @property
+    def texture(self) -> gfx.Texture:
+        return self.wrapping_buffer.texture
+
+    def center_on_position(
+        self,
+        position: tuple[float, float, float],
+        size: tuple[int, int, int] | None = None,
+    ):
+        """
+        Center the sub volume on a given position in world coordinates.
+
+        Args:
+            position (tuple[float, float, float]):
+                The world position to center the sub volume on, as a tuple of (x, y, z).
+            size (tuple[int, int, int] | None):
+                The size of the sub volume to load, as a tuple of (width, height, depth).
+                 If not passed, the size will be chosen to max out the available space in the wrapping buffer.
+        """
+        if size is None:
+            size = self.wrapping_buffer.shape_in_pixels
+
+        # convert the world position to our local space using the inverse world matrix
+        # we need to attach and then remove the homogeneous coordinate to play nice with the matrix multiplication
+        camera_data_pos = tuple(self.world.inverse_matrix @ np.array([*position, 1]))[
+            :3
+        ]
+        camera_data_pos = camera_data_pos[::-1]
+        logical_roi = Roi(
+            tuple(int(c - s // 2) for c, s in zip(camera_data_pos, size)),
+            size,
         )
-        self.uniform_buffer.data["ring_buffer_dimensions_in_chunks"] = np.array(
-            self.ring_buffer_dimensions_in_chunks[::-1], dtype=np.float32
-        )
-        self.uniform_buffer.data["ring_buffer_n"] = np.array(
-            self.ring_buffer_n[::-1], dtype=np.float32
-        )
+        # do we really need this check if load_logical_roi does the check internally?
+        # inclined to keep since the internal check is an implementation detail
+        if self.wrapping_buffer.can_load_logical_roi(logical_roi):
+            self.wrapping_buffer.load_logical_roi(logical_roi)
 
     def _get_bounds_from_geometry(self):
         if self._bounds_geometry is not None:
