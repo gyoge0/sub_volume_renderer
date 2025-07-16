@@ -57,9 +57,10 @@ fn fs_main(varyings: Varyings) -> FragmentOutput {
     // Create fragment output.
     var out: FragmentOutput;
     out.color = render_out.color;
-    out.depth = ndc_pos.z / ndc_pos.w;
+//    out.depth = ndc_pos.z / ndc_pos.w;
+    out.depth = clamp(ndc_pos.z / max(ndc_pos.w, 0.0001), 0.0, 1.0);
 
-    $$ if write_pick
+        $$ if write_pick
     // The wobject-id must be 20 bits. In total it must not exceed 64 bits.
     out.pick = (
         pick_pack(u32(u_wobject.id), 20) +

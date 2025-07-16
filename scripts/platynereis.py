@@ -4,7 +4,7 @@ import wgpu
 import zarr
 from rendercanvas.auto import RenderCanvas, loop
 
-from sub_volume import SubVolume
+from sub_volume import SubVolume, SubVolumeMaterial
 
 # select gpu
 adapters = wgpu.gpu.enumerate_adapters_sync()
@@ -34,13 +34,13 @@ data = zarr.open_array(
 )
 # data is stored as [channel, t, z, y, x]
 scaled_data = data[0, 378, :, :, :]
-scaled_data = scaled_data / scaled_data.max()
 scaled_data[:25, :25, :25] = 1.0
 scaled_data = scaled_data.astype(np.float32)
 
 # create a volume
 # noinspection PyTypeChecker
 volume = SubVolume(
+    SubVolumeMaterial(clim=(0, np.percentile(scaled_data, 99)), map=gfx.cm.inferno),
     data=scaled_data,
     buffer_shape_in_chunks=(3, 3, 3),
     # scaled_data is an ndarray now, so we need to provide chunk shape manually

@@ -22,6 +22,7 @@ class SubVolume(gfx.Volume):
 
     def __init__(
         self,
+        material: SubVolumeMaterial,
         data: npt.NDArray | zarr.Array,
         buffer_shape_in_chunks: tuple[int, int, int],
         chunk_shape_in_pixels: tuple[int, int, int] | None = None,
@@ -45,7 +46,7 @@ class SubVolume(gfx.Volume):
         geometry = gfx.box_geometry(*self.volume_dimensions)
         super().__init__(
             geometry=geometry,
-            material=SubVolumeMaterial(),
+            material=material,
         )
 
         # indexing in the shader is done Fortran style (z, y, x), but these dimensions
