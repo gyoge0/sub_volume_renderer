@@ -86,15 +86,15 @@ class WrappingBuffer:
 
         data_shape = self.backing_data.shape
         data_roi_shape_in_pixels = Roi((0, 0, 0), data_shape)
-        # Intersect with the data roi
-        # this only selects the part of the Roi that is within the data bounds
+
+        # by taking the intersection and then growing to the grid again, we remove any chunks that
+        # are entirely outside the backing data. note that the new resulting snapped_roi will still partially
+        # overlap with the backing data and could contain out of bounds data.
         snapped_roi = snapped_roi.intersect(data_roi_shape_in_pixels)
         if snapped_roi.empty:
             return snapped_roi
-        # Snap to chunk bounds (shrink)
-        # this ensures that again we are only loading data in whole chunks
         snapped_roi = snapped_roi.snap_to_grid(
-            voxel_size=self.chunk_shape_in_pixels, mode="shrink"
+            voxel_size=self.chunk_shape_in_pixels, mode="grow"
         )
         return snapped_roi
 
@@ -113,7 +113,7 @@ class WrappingBuffer:
 
     def load_logical_roi(self, logical_roi_in_pixels: Roi):
         snapped_roi = self.get_snapped_roi_in_pixels(logical_roi_in_pixels)
-        if not self.can_load_logical_roi(snapped_roi) or snapped_roi.empty:
+        if not self.can_load_logical_roi(logical_roi_in_pixels) or snapped_roi.empty:
             return
         logical_roi_in_chunks = snapped_roi / self.chunk_shape_in_pixels
 
@@ -217,9 +217,10 @@ class WrappingBuffer:
             buffer_roi_in_chunks (Roi):
                 A buffer Roi in chunk coordinates that is within the bounds of the buffer.
             logical_roi_in_chunks (Roi):
-                A logical Roi in chunk coordinates that is within the bounds of the backing data, corresponding to the
-                buffer_roi_in_chunks. Because it corresponds to the buffer Roi, it must also not cross any
-                buffer boundaries and cannot be larger than the buffer Roi.
+                A logical Roi in chunk coordinates corresponding to the buffer_roi_in_chunks.
+
+                This Roi MUST intersect with the backing data, and it MAY be partially outside the bounds of the
+                backing data. It MUST NOT cross any buffer boundaries and MUST NOT be larger than the buffer Roi.
         """
         # Convert both ROIs to pixel space
         buffer_roi_in_pixels = buffer_roi_in_chunks * self.chunk_shape_in_pixels
@@ -231,28 +232,23 @@ class WrappingBuffer:
                 slice(int(o), int(o) + int(s)) for o, s in zip(roi.offset, roi.shape)
             )
 
-        src_slices = roi_to_slices(logical_roi_in_pixels)
-        dst_slices = roi_to_slices(buffer_roi_in_pixels)
-
         # Check for empty ROI
-        if any(s.stop - s.start == 0 for s in src_slices):
+        if logical_roi_in_pixels.empty or buffer_roi_in_pixels.empty:
             return
+        src_slices = roi_to_slices(logical_roi_in_pixels)
 
-        # Shapes must match
-        src_shape = tuple(s.stop - s.start for s in src_slices)
-        dst_shape = tuple(s.stop - s.start for s in dst_slices)
-        if src_shape != dst_shape:
-            raise ValueError(
-                f"Source and destination shapes do not match: {src_shape} vs {dst_shape}"
-            )
-
-        # Read from backing array
+        # Read from backing array (may return smaller shape than requested if partially out-of-bounds)
         data = self.backing_data[src_slices]
+        actual_shape = data.shape
 
-        # Write to texture
+        # Adjust destination slices to match actual data shape
+        actual_buffer_roi_in_pixels = Roi(buffer_roi_in_pixels.offset, actual_shape)
+        dst_slices = roi_to_slices(actual_buffer_roi_in_pixels)
+
+        # Write to texture with adjusted slices
         self.texture.data[dst_slices] = data
         self.texture.update_range(
-            buffer_roi_in_pixels.offset, buffer_roi_in_pixels.shape
+            actual_buffer_roi_in_pixels.offset, actual_buffer_roi_in_pixels.shape
         )
 
 
