@@ -63,6 +63,14 @@ When the camera is positioned inside the volume, depth calculation can become un
 - Division by near-zero causing fragment discard during depth testing
 - **Fix**: Use `clamp(ndc_pos.z / max(ndc_pos.w, 0.0001), 0.0, 1.0)` for robust depth calculation
 
+### Boundary Chunk Loading (RESOLVED)
+Previously, chunks wouldn't load at the "far end" of data boundaries on all axes. This was caused by:
+- `get_snapped_roi_in_pixels` using intersection+shrink which created empty ROIs at boundaries
+- **Root cause**: intersection+shrink mode after grid snapping removed chunks that partially extended beyond data bounds
+- **Solution**: Changed to intersection+grow mode, allowing partial out-of-bounds chunks to load
+- **Key insight**: numpy/zarr arrays safely handle out-of-bounds access by returning smaller shapes
+- **Fix location**: `_wrapping_buffer.py` lines 80-99 and `load_into_buffer` method lines 212-252
+
 ### Coordinate System Debugging
 - If shader sampling appears offset, check coordinate system reversals
 - `current_logical_offset_in_pixels` and `current_logical_shape_in_pixels` are passed in Fortran order
@@ -73,6 +81,7 @@ When the camera is positioned inside the volume, depth calculation can become un
 ### Test Structure
 - `tests/basic_volume/` - Core volume rendering tests
 - `tests/wrapping_buffer/` - Wrapping buffer unit tests
+  - `test_boundary_loading.py` - Comprehensive boundary loading edge cases (21 tests)
 - Uses pytest with offscreen WebGPU canvas for headless testing
 - `conftest.py` provides `gfx_context` fixture for rendering tests
 
@@ -80,6 +89,7 @@ When the camera is positioned inside the volume, depth calculation can become un
 ```bash
 pixi run test tests/basic_volume/test_volume_init.py
 pixi run test tests/wrapping_buffer/test_load_logical_roi.py
+pixi run test tests/wrapping_buffer/test_boundary_loading.py
 ```
 
 ## Dependencies
@@ -119,3 +129,9 @@ pixi run test tests/wrapping_buffer/test_load_logical_roi.py
 - Check `current_logical_offset_in_pixels` and `current_logical_shape_in_pixels` in uniform buffer
 - Verify camera position with `center_on_position()` calls
 - Use debug colors in shaders to visualize bounds and sampling issues
+
+### Debugging Chunk Loading Issues
+- Use `scripts/debug_chunk_loading.py` to systematically test boundary loading
+- Check if `get_snapped_roi_in_pixels` returns empty ROIs at boundaries
+- Verify `load_into_buffer` handles partial out-of-bounds data correctly
+- Test with various chunk sizes and buffer configurations
