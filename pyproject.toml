@@ -3,7 +3,12 @@ authors = [{name = "Yogesh Thambidurai", email = "yogesh@gyoge.com"}]
 name = "sub_volume"
 requires-python = ">= 3.11"
 version = "0.1.0"
-dependencies = [ "funlib-geometry>=0.3.0,<0.4", "glfw>=2.9.0,<3"]
+dependencies = [
+  "funlib-geometry>=0.3.0,<0.4",
+  "glfw>=2.9.0,<3",
+  "numpy",
+  "pygfx",
+]
 
 [build-system]
 build-backend = "hatchling.build"
