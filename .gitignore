@@ -1,3 +1,11 @@
+.idea
+.hypothesis
+__pycache__
+
+# pixi environments
+.pixi
+*.egg-info
+
 CLAUDE.md
 .claude
 NOTES.claude.md
