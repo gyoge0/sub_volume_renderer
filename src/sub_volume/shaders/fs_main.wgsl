@@ -49,25 +49,8 @@ fn fs_main(varyings: Varyings) -> FragmentOutput {
     // Render
     let render_out = raycast(sizef, nsteps, start_coord, step_coord);
 
-    // Get world and ndc pos from the calculatex texture coordinate
-    let data_pos = render_out.coord * sizef - vec3<f32>(0.5, 0.5, 0.5);
-    let world_pos = u_wobject.world_transform * vec4<f32>(data_pos, 1.0);
-    let ndc_pos = u_stdinfo.projection_transform * u_stdinfo.cam_transform * world_pos;
-
     // Create fragment output.
     var out: FragmentOutput;
     out.color = render_out.color;
-//    out.depth = ndc_pos.z / ndc_pos.w;
-    out.depth = clamp(ndc_pos.z / max(ndc_pos.w, 0.0001), 0.0, 1.0);
-
-        $$ if write_pick
-    // The wobject-id must be 20 bits. In total it must not exceed 64 bits.
-    out.pick = (
-        pick_pack(u32(u_wobject.id), 20) +
-        pick_pack(u32(render_out.coord.x * 16383.0), 14) +
-        pick_pack(u32(render_out.coord.y * 16383.0), 14) +
-        pick_pack(u32(render_out.coord.z * 16383.0), 14)
-    );
-    $$ endif
     return out;
 }
