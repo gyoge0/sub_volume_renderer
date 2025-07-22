@@ -1,24 +1,10 @@
-fn sample_hs_color(i: u32, n: u32) -> vec2<f32> {
-    let i_f = f32(i);
-    let n_f = f32(n);
-
-    var h: f32;
-    $$ if prefer_purple_orange
-        if i < n / 2 {
-            h = 0.65 * (0.25 * i_f / n_f);
-        } else {
-            h = (0.90 + (0.25 * i_f / n_f)) % 1.0;
-        }
-        $$ else
-        h = i_f / n_f;
-        $$ endif
-
-        let s: f32 = 0.1 + 0.5 * (i_f % 2) + 0.4 * i_f / n_f;
-        return vec2<f32>(h, s);
+fn sample_hs_color(i: u32) -> vec2<f32> {
+    return u_material.colors[i % u_material.color_count].rg;
 }
 
+
 // Written by Claude Sonnet 4
-fn hsv_to_rgb(hsv: vec3<f32>) -> vec3<f32>{
+fn hsv_to_rgb(hsv: vec3<f32>) -> vec3<f32> {
     let h = hsv.x;
     let s = hsv.y;
     let v = hsv.z;
