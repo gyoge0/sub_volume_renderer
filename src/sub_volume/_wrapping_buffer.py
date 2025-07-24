@@ -15,6 +15,7 @@ class WrappingBuffer:
     uniform_type = {
         "current_logical_offset_in_pixels": "3xi4",
         "current_logical_shape_in_pixels": "3xi4",
+        "scale_factor": "3xf4",
     }
 
     def __init__(
@@ -23,6 +24,7 @@ class WrappingBuffer:
         segmentations: npt.NDArray,
         shape_in_chunks: tuple[int, int, int] | Coordinate,
         chunk_shape_in_pixels: tuple[int, int, int] | Coordinate = None,
+        scale_factor: tuple[float, float, float] = (1.0, 1.0, 1.0),
     ):
         """
         Args:
@@ -34,6 +36,8 @@ class WrappingBuffer:
                 The shape of the wrapping buffer in chunks.
             chunk_shape_in_pixels (tuple[int, int, int] or Coordinate, optional):
                 The shape of a chunk in pixels. If not provided, it will be inferred from the backing array.
+            scale_factor (tuple[float, float, float] or Coordinate, optional):
+                The scale factor for this level relative to the base resolution. Defaults to (1.0, 1.0, 1.0).
         """  # noqa: D205
         # D205 mistakes "Args:" as a summary
         self.backing_data = backing_data
@@ -55,13 +59,15 @@ class WrappingBuffer:
         )
 
         # create our uniform buffer
-        # we need to create this BEFORE we set _current_logical_roi_in_pixels
+        # we need to create this BEFORE we set any uniform backed properties
         self.uniform_buffer = gfx.Buffer(
             gfx.utils.array_from_shadertype(self.uniform_type), force_contiguous=True
         )
+
         # this will fill our uniform buffer with data
         self._current_logical_roi_in_pixels = None
         self._current_logical_roi_in_chunks: Roi | None = None
+        self.scale_factor = tuple(float(x) for x in scale_factor)
 
     @property
     def _current_logical_roi_in_pixels(self) -> Roi | None:
@@ -88,6 +94,25 @@ class WrappingBuffer:
             self.uniform_buffer.data["current_logical_shape_in_pixels"] = np.array(
                 (0, 0, 0)
             ).astype(int)[::-1]
+        self.uniform_buffer.update_full()
+
+    @property
+    def scale_factor(self) -> tuple[float, float, float]:
+        """Get the scale factor for this level relative to the base resolution in (x, y, z) order."""
+        # noinspection PyTypeChecker
+        return tuple(self.uniform_buffer.data["scale_factor"][::-1])
+
+    @scale_factor.setter
+    def scale_factor(self, value: tuple[float, float, float]):
+        """
+        Args:
+            value (tuple[float, float, float]):
+                The scale factor for this level relative to the base resolution in (x, y, z) order.
+        """  # noqa: D205
+        # D205 mistakes "Args:" as a summary
+        self.uniform_buffer.data["scale_factor"] = np.array(
+            value[::-1], dtype=np.float32
+        )
         self.uniform_buffer.update_full()
 
     def get_snapped_roi_in_pixels(self, logical_roi_in_pixels: Roi) -> Roi:
