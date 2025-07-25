@@ -99,7 +99,7 @@ class SubVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
         if material.map is not None:
             bindings.extend(self.define_img_colormap(material.map))
 
-        bindings = {i: b for i, b in enumerate(bindings)}
+        bindings = dict(enumerate(bindings))
         self.define_bindings(0, bindings)
 
         return {

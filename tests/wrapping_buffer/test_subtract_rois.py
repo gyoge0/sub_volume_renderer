@@ -47,8 +47,10 @@ def test_partial_overlap_middle():
     assert len(result) == 2
     offsets = [r.offset for r in result]
     shapes = [r.shape for r in result]
-    assert (0, 0, 0) in offsets and (4, 0, 0) in offsets
-    assert (2, 4, 4) in shapes and (2, 4, 4) in shapes
+    assert (0, 0, 0) in offsets
+    assert (4, 0, 0) in offsets
+    assert (2, 4, 4) in shapes
+    assert (2, 4, 4) in shapes
 
 
 def test_touching_but_not_overlapping():
@@ -82,7 +84,7 @@ def test_overlap_2_axes():
     for r in result:
         assert not r.intersects(b)
         assert a.contains(r)
-    assert sum(map(lambda x: x.size, result)) == a.size - a.intersect(b).size
+    assert sum(x.size for x in result) == a.size - a.intersect(b).size
     assert all(not a.intersects(b) for a, b in combinations(result, 2))
 
 
@@ -96,7 +98,7 @@ def test_overlap_3_axes():
     for r in result:
         assert not r.intersects(b)
         assert a.contains(r)
-    assert sum(map(lambda x: x.size, result)) == a.size - a.intersect(b).size
+    assert sum(x.size for x in result) == a.size - a.intersect(b).size
     assert all(not a.intersects(b) for a, b in combinations(result, 2))
 
 
@@ -129,7 +131,7 @@ def test_property_no_overlap_with_b(data):
         assert not r.intersects(b)
         assert a.contains(r)
 
-    actual_size = sum(map(lambda x: x.size, result))
+    actual_size = sum(x.size for x in result)
     expected_size = a.size - a.intersect(b).size
     assert actual_size == expected_size
 

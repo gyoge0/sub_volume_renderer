@@ -10,9 +10,7 @@ from funlib.geometry import Roi as OriginalRoi
 
 @deprecated("Will be removed when the new ring buffer API is implemented.")
 class Roi(OriginalRoi):
-    """
-    A ROI that can be hashed by the offset and shape.
-    """
+    """A ROI that can be hashed by the offset and shape."""
 
     def __hash__(self):
         return hash((self.offset, self.shape))

@@ -74,6 +74,7 @@ class SubVolume(gfx.Volume):
             size (tuple[int, int, int] | None):
                 The size of the sub volume to load, as a tuple of (width, height, depth).
                  If not passed, the size will be chosen to max out the available space in the wrapping buffer.
+
         """
         if size is None:
             size = self.wrapping_buffer.shape_in_pixels

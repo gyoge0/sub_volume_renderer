@@ -10,10 +10,10 @@ class WrappingBuffer:
     Handles chunking, wrapping, and efficient data movement into a gfx.Texture.
     """
 
-    uniform_type = dict(
-        current_logical_offset_in_pixels="3xi4",
-        current_logical_shape_in_pixels="3xi4",
-    )
+    uniform_type = {
+        "current_logical_offset_in_pixels": "3xi4",
+        "current_logical_shape_in_pixels": "3xi4",
+    }
 
     def __init__(
         self,
@@ -29,6 +29,7 @@ class WrappingBuffer:
                 The shape of the wrapping buffer in chunks.
             chunk_shape_in_pixels (tuple[int, int, int] or Coordinate, optional):
                 The shape of a chunk in pixels. If not provided, it will be inferred from the backing array.
+
         """
         self.backing_data = backing_data
         self.shape_in_chunks = Coordinate(shape_in_chunks)
@@ -107,9 +108,9 @@ class WrappingBuffer:
         roi_shape = logical_roi_in_pixels.shape
         buffer_shape = self.shape_in_pixels
         # check each dimension of the Roi and ensure it fits within the buffer
-        if any(roi_dim > buf_dim for roi_dim, buf_dim in zip(roi_shape, buffer_shape)):
-            return False
-        return True
+        return not any(
+            roi_dim > buf_dim for roi_dim, buf_dim in zip(roi_shape, buffer_shape)
+        )
 
     def load_logical_roi(self, logical_roi_in_pixels: Roi):
         snapped_roi = self.get_snapped_roi_in_pixels(logical_roi_in_pixels)
@@ -152,6 +153,7 @@ class WrappingBuffer:
         Returns:
             A list of tuples (a, b) where a is the buffer Roi and b is the corresponding logical Roi. b will not
             cross any buffer boundaries.
+
         """
         # Note: since logical_roi_in_chunks cannot be larger than the buffer Roi, it can also only cross
         # buffer boundaries once in each dimension. If it were to cross twice, it would be larger than the
@@ -221,6 +223,7 @@ class WrappingBuffer:
 
                 This Roi MUST intersect with the backing data, and it MAY be partially outside the bounds of the
                 backing data. It MUST NOT cross any buffer boundaries and MUST NOT be larger than the buffer Roi.
+
         """
         # Convert both ROIs to pixel space
         buffer_roi_in_pixels = buffer_roi_in_chunks * self.chunk_shape_in_pixels
