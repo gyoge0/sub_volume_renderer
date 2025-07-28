@@ -116,6 +116,18 @@ class WrappingBuffer:
         self.uniform_buffer.update_full()
 
     def get_snapped_roi_in_pixels(self, logical_roi_in_pixels: Roi) -> Roi:
+        """
+        Snap a logical ROI to the chunk grid by growing it.
+
+        Args:
+            logical_roi_in_pixels (Roi):
+                A logical Roi in pixels that might not be aligned with the chunk grid.
+
+        Returns:
+            Roi:
+                A snapped Roi in pixels that is aligned with the chunk grid.
+
+        """
         data_shape = self.backing_data.shape
         data_roi_shape_in_pixels = Roi((0, 0, 0), data_shape)
 
@@ -146,6 +158,15 @@ class WrappingBuffer:
         )
 
     def load_logical_roi(self, logical_roi_in_pixels: Roi):
+        """
+        Update the buffer to contain all chunks that intersect with the volume and the given logical Roi.
+
+        Args:
+            logical_roi_in_pixels (Roi):
+                A logical Roi in pixels that is within the bounds of the backing data.
+                This Roi may not be larger than the buffer Roi, but it may cross buffer boundaries.
+
+        """
         snapped_roi = self.get_snapped_roi_in_pixels(logical_roi_in_pixels)
         if not self.can_load_logical_roi(logical_roi_in_pixels) or snapped_roi.empty:
             return
