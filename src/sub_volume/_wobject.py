@@ -182,9 +182,11 @@ class SubVolume(gfx.Volume):
 
         # convert the world position to our local space using the inverse world matrix
         # we need to attach and then remove the homogeneous coordinate to play nice with the matrix multiplication
+        # the matrices are in Fortran style (z, y, x) and so is this result
         camera_data_pos = tuple(self.world.inverse_matrix @ np.array([*position, 1]))[
             :3
         ]
+        # we reverse the order here to get C/numpy style (x, y, z)
         camera_data_pos = camera_data_pos[::-1]
         logical_rois = [
             Roi(
