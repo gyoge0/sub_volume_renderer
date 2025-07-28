@@ -28,19 +28,19 @@ background = gfx.Background(None, gfx.BackgroundMaterial(light_gray, dark_gray))
 scene.add(background)
 scene.add(gfx.AmbientLight())
 
-chunk_0 = np.zeros((16, 16, 16))
+chunk_0 = np.zeros((16, 16, 48))
 chunk_0[:4, :4, :4] = 1
 data_0 = np.tile(chunk_0, (16, 16, 16))
-chunk_1 = np.zeros((8, 8, 8))
-chunk_1[:2, :2, :2] = 1
+chunk_1 = np.zeros((8, 8, 48))
+chunk_1[:2, :2, :4] = 1
 data_1 = np.tile(chunk_1, (16, 16, 16))
-chunk_2 = np.zeros((4, 4, 4))
-chunk_2[:1, :1, :1] = 1
+chunk_2 = np.zeros((4, 4, 48))
+chunk_2[:1, :1, :4] = 1
 data_2 = np.tile(chunk_2, (16, 16, 16))
 
-segmentations_0 = 0 * np.ones((256, 256, 256), dtype=np.uint8)
-segmentations_1 = 1 * np.ones((128, 128, 128), dtype=np.uint8)
-segmentations_2 = 2 * np.ones((64, 64, 64), dtype=np.uint8)
+segmentations_0 = 0 * np.ones(data_0.shape, dtype=np.uint8)
+segmentations_1 = 1 * np.ones(data_1.shape, dtype=np.uint8)
+segmentations_2 = 2 * np.ones(data_2.shape, dtype=np.uint8)
 
 # create a volume
 volume = SubVolume(
@@ -59,9 +59,9 @@ volume = SubVolume(
         (data_2, segmentations_2),
     ],
     chunk_shape_in_pixels=[
-        (16, 16, 16),
-        (8, 8, 8),
-        (4, 4, 4),
+        (16, 16, 48),
+        (8, 8, 48),
+        (4, 4, 48),
     ],
     buffer_shape_in_chunks=[
         (2, 2, 2),
