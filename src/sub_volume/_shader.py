@@ -20,12 +20,16 @@ from ._wobject import SubVolume
 register_wgsl_loader("sub_volume", PackageLoader("sub_volume", "shaders"))
 
 
+# register_wgpu_render_function can register multiple shaders for (wobject, material) pairs,
+# but we default to having a single shader for now.
+# in theory, we could use this to have multiple shader passes
 @wgpu.register_wgpu_render_function(SubVolume, SubVolumeMaterial)
 class SubVolumeShader(wgpu.shaders.volumeshader.VolumeRayShader):
     def __init__(self, wobject: SubVolume, **kwargs):
         # skip the BaseVolumeShader init because we don't have a geometry.grid and
         # that breaks the init.
         # we perform all the actions from BaseVolumeShader inside this init.
+        # refer to BaseVolumeShader for more details on this code.
         BaseShader.__init__(self, wobject, **kwargs)
 
         material: SubVolumeMaterial = wobject.material
