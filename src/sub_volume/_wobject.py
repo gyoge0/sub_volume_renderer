@@ -28,7 +28,6 @@ class SubVolume(gfx.Volume):
     ):
         # Use the first (highest resolution) data for base volume dimensions
         base_data = data_segmentation_pairs[0][0]
-        self.volume_dimensions = base_data.shape
         num_scales = len(data_segmentation_pairs)
 
         # Handle per-scale or uniform buffer configurations
@@ -91,17 +90,36 @@ class SubVolume(gfx.Volume):
             )
             self.wrapping_buffers.append(buffer)
 
-        geometry = gfx.box_geometry(*self.volume_dimensions)
+        # we should probably use self.volume_dimensions here
+        geometry = gfx.box_geometry(*base_data.shape)
+        # but we need to call super().__init__() to set up our uniform buffer
         super().__init__(
             geometry=geometry,
             material=material,
         )
+        # and only then we can set self.volume_dimensions
+        self.volume_dimensions = base_data.shape
+
+    @property
+    def volume_dimensions(self) -> tuple[int, int, int]:
+        """The dimensions of the volume in pixels in (x, y, z) order."""
+        # noinspection PyTypeChecker
+        return tuple(self.uniform_buffer.data["volume_dimensions"][::-1])
+
+    @volume_dimensions.setter
+    def volume_dimensions(self, value: tuple[int, int, int]):
+        """
+        Args:
+            value (tuple[int, int, int]):
+                The volume dimensions in (x, y, z) order.
+        """  # noqa: D205
+        # D205 mistakes "Args:" as a summary
 
         # indexing in the shader is done Fortran style (z, y, x), but these dimensions
         # all assume numpy/C style indexing (x, y, z). we pass the dimensions in Fortran
         # style to the shader so the shader completely operates in Fortran style.
         self.uniform_buffer.data["volume_dimensions"] = np.array(
-            tuple(self.volume_dimensions)[::-1], dtype=np.float32
+            tuple(value)[::-1], dtype=np.float32
         )
 
     @property
