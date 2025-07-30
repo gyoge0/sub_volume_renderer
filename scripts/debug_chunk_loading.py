@@ -22,7 +22,7 @@ def test_chunk_loading_boundaries():
     """Test chunk loading at volume boundaries to identify problematic axes/directions."""
 
     # Create test data - larger than typical to test boundaries
-    test_data = np.random.rand(100, 80, 120).astype(np.float32)
+    test_data = np.random.default_rng().random(100, 80, 120).astype(np.float32)
     print(f"Test data shape: {test_data.shape}")
 
     # Create volume with small buffer to force frequent loading
@@ -121,7 +121,7 @@ def test_chunk_loading_boundaries():
 def debug_roi_calculation(test_pos):
     """Debug the ROI calculation logic step by step."""
 
-    test_data = np.random.rand(100, 80, 120).astype(np.float32)
+    test_data = np.random.default_rng().random(100, 80, 120).astype(np.float32)
     volume = SubVolume(
         SubVolumeMaterial(),
         data=test_data,
@@ -184,7 +184,7 @@ def debug_roi_calculation(test_pos):
 def systematic_boundary_test():
     """Test positions along each axis systematically."""
 
-    test_data = np.random.rand(64, 64, 64).astype(np.float32)
+    test_data = np.random.default_rng().random(64, 64, 64).astype(np.float32)
     volume = SubVolume(
         SubVolumeMaterial(),
         data=test_data,

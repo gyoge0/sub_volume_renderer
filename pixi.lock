@@ -1171,7 +1171,7 @@ packages:
 - pypi: ./
   name: sub-volume
   version: 0.1.0
-  sha256: 40400d4fb7351413af965fcb84a227ad5d82b9c5b3c8ca3f54ef6d58701aabf7
+  sha256: 955016ef7718a5a412b8f4f5b612ab18df8481a7fe0fef135b6f389aae18b4ee
   requires_dist:
   - funlib-geometry>=0.3.0,<0.4
   - glfw>=2.9.0,<3

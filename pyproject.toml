@@ -48,3 +48,46 @@ check = "ruff check ."
 
 [tool.pixi.environments]
 dev = ["dev", "test"]
+
+[tool.ruff.lint]
+preview = true
+pydocstyle.convention = "google"
+select = [
+    # ruff defaults
+    "E4", "E7", "E9", "F",
+    # imports
+    "F401", "I",
+    # simplify statements
+    "SIM",
+    # pytest
+    "PT",
+    # comprehensions
+    "C4",
+    # builtins
+    "A",
+    # unused arguments
+    "ARG",
+    # numpy
+    "NPY",
+    # naming conventions
+    "N",
+    # extraneous docstring return/yield/raise
+    # also consider adding DOC as a whole?
+    "DOC202", "DOC403", "DOC502",
+    # general docstring stuff
+    "D", 
+    # no blank lines before class docstrings
+    "D211",
+    # multiline docstrings start on second line
+    "D213",
+    # python upgrades
+    "UP",
+]
+
+ignore = [
+    # conflicts with D211 and D213
+    "D203", "D212",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/{tests,scripts}/*" = ["D", "DOC"]

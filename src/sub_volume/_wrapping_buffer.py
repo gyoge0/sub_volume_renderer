@@ -7,6 +7,7 @@ from funlib.geometry import Coordinate, Roi
 class WrappingBuffer:
     """
     A buffer for volumetric data that operates in world coordinates.
+
     Handles chunking, wrapping, and efficient data movement into a gfx.Texture.
     """
 
@@ -29,8 +30,8 @@ class WrappingBuffer:
                 The shape of the wrapping buffer in chunks.
             chunk_shape_in_pixels (tuple[int, int, int] or Coordinate, optional):
                 The shape of a chunk in pixels. If not provided, it will be inferred from the backing array.
-
-        """
+        """  # noqa: D205
+        # D205 mistakes "Args:" as a summary
         self.backing_data = backing_data
         self.shape_in_chunks = Coordinate(shape_in_chunks)
         self.chunk_shape_in_pixels = Coordinate(chunk_shape_in_pixels)
@@ -102,7 +103,9 @@ class WrappingBuffer:
     def can_load_logical_roi(self, logical_roi_in_pixels: Roi) -> bool:
         """
         Snap the ROI to chunk bounds, then check if it fits in the buffer.
-        Returns True if it fits, False otherwise.
+
+        Returns:
+            True if it fits, False otherwise.
         """
         # Snap to chunk bounds (grow)
         roi_shape = logical_roi_in_pixels.shape

@@ -4,9 +4,7 @@ from funlib.geometry import Coordinate
 from sub_volume import SubVolume
 
 
-def test_volume_texture_update(
-    data_shape, increasing_data, chunk_dimensions, gfx_context, camera
-):
+def test_volume_texture_update(increasing_data, chunk_dimensions, gfx_context, camera):
     volume = SubVolume(
         increasing_data, chunk_dimensions, ring_buffer_n=Coordinate(1, 1, 1)
     )

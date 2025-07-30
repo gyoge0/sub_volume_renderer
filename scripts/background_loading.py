@@ -29,7 +29,10 @@ colormap1 = gfx.cm.plasma
 
 
 def create_random_image():
-    rand_img = np.random.rand(TEXTURE_WIDTH, TEXTURE_HEIGHT).astype(np.float32) * 255
+    rand_img = (
+        np.random.default_rng().random(TEXTURE_WIDTH, TEXTURE_HEIGHT).astype(np.float32)
+        * 255
+    )
 
     return gfx.Image(
         gfx.Geometry(grid=gfx.Texture(rand_img, dim=2)),
@@ -85,7 +88,10 @@ def update_texture(data):
 running = True
 
 print("Creating data...")
-data = np.random.rand(10, TEXTURE_WIDTH, TEXTURE_HEIGHT).astype(np.float32) * 255
+data = (
+    np.random.default_rng().random(10, TEXTURE_WIDTH, TEXTURE_HEIGHT).astype(np.float32)
+    * 255
+)
 print("...done!")
 
 
