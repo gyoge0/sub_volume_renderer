@@ -70,19 +70,22 @@ fn fs_main(varyings: Varyings) -> FragmentOutput {
         // but it stays within the intention of the math for the volume renderer. An alternative might be to return the
         // offset used to sample from the texture, but that would require a different calculation from the current one.
         let depth: f32 = ndc_pos.z / max(ndc_pos.w, 0.001);
+        var fogged_intensity: vec3<f32>;
+        if u_material.use_segmentations == 1.0 {
+            let i = render_out.segmentation;
+            let hsv: vec3<f32> = vec3<f32>(sample_hs_color(i), render_out.color.r);
+            let rgb: vec3<f32> = hsv_to_rgb(hsv);
 
-        let i = render_out.segmentation;
-        let hsv: vec3<f32> = vec3<f32>(sample_hs_color(i), render_out.color.r);
-        let rgb: vec3<f32> = hsv_to_rgb(hsv);
+            let fog_density: f32 = u_material.fog_density;
+            let fog_color: vec3<f32> = u_material.fog_color;
 
-        let fog_density: f32 = u_material.fog_density;
-        let fog_color: vec3<f32> = u_material.fog_color;
-
-        let offset = render_out.offset;
-        let distance = length(offset);
-        let fog_factor = exp(-fog_density * distance);
-        let fogged_intensity = mix(fog_color, rgb, fog_factor);
-
+            let offset = render_out.offset;
+            let distance = length(offset);
+            let fog_factor = exp(-fog_density * distance);
+            fogged_intensity = mix(fog_color, rgb, fog_factor);
+        } else {
+            fogged_intensity = render_out.color.rgb;
+        }
         out.color = vec4<f32>(fogged_intensity, u_material.opacity);
         out.depth = depth;
 

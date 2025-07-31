@@ -21,6 +21,7 @@ class SubVolumeMaterial(gfx.VolumeMipMaterial):
         # to get around this, we just use an array of n*4xf4 and ignore the last component.
         # all inputs are still expected to be 3-component tuples! this is just a lie we tell pygfx.
         colors="0*4xf4",
+        use_segmentations="f4",
     )
 
     def __init__(
@@ -56,6 +57,8 @@ class SubVolumeMaterial(gfx.VolumeMipMaterial):
                 (0.75, 1.0, 1.0),
             ]
         self.colors = colors
+
+        self.uniform_buffer.data["use_segmentations"] = 0.0
 
     @property
     def lmip_threshold(self) -> float:
